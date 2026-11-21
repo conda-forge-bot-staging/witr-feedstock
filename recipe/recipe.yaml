@@ -1,0 +1,49 @@
+context:
+  name: witr
+  version: "0.1.8"
+
+package:
+  name: ${{ name|lower }}
+  version: ${{ version }}
+
+source:
+  url: https://github.com/pranshuparmar/${{ name }}/archive/refs/tags/v${{ version }}.tar.gz
+  sha256: 31ec1c55d9898a27a066de684caa44becbced2fe8c12c0b0e831b2ff9d62f6d0
+  target_directory: src
+
+build:
+  number: 0
+  # https://github.com/pranshuparmar/witr/tree/v0.1.7?tab=readme-ov-file#9-platform-support
+  skip: not unix
+  script:
+    - cd src
+    - go-licenses save ./cmd/witr --save_path ../library_licenses
+    - go build -v -o $PREFIX/bin/witr -ldflags="-s -w -X main.version=${{ version }}" ./cmd/witr
+
+requirements:
+  build:
+    - ${{ compiler("go-nocgo") }}
+    - go-licenses
+
+tests:
+  - script:
+      - witr --help
+      - witr --version
+  - package_contents:
+      bin:
+        - witr
+      strict: true
+
+about:
+  homepage: https://github.com/pranshuparmar/witr
+  summary: Why is this running?
+  license: Apache-2.0
+  license_file:
+    - src/LICENSE
+    - library_licenses/
+  documentation: https://pkg.go.dev/github.com/pranshuparmar/witr
+  repository: https://github.com/pranshuparmar/witr
+
+extra:
+  recipe-maintainers:
+    - pavelzw
